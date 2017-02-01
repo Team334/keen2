@@ -12,10 +12,14 @@ if len(sys.argv) != 2:
     sys.exit(-1)
 mode = sys.argv[1]
 
+cv_version =  cv2.__version__.split(".")[0]
 cap = cv2.VideoCapture(0)
+writer = None
 if mode == "DEBUG":
-    writer = debug.initOutputVideo(w=1280, h=720)
-    #writer = debug.initOutputVideo(w=640, h=480)
+    if cv_version == "2":
+        writer = debug.initOutputVideo(w=640, h=480)
+    elif cv_version == "3":
+        writer = debug.initOutputVideo(w=1280, h=720)
 
 prev_time = time.time()
 times = np.zeros((30,))
@@ -34,16 +38,24 @@ def process_frame(frame):
 
     in_copy = frame.copy()
 
-    #contours, h = cv2.findContours(thresh.copy(), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
-    _, contours, h = cv2.findContours(thresh.copy(), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
+    contours = None
+    if cv_version == "2":
+        contours, h = cv2.findContours(thresh.copy(), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
+    elif cv_version == "3":
+        _, contours, h = cv2.findContours(thresh.copy(), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
 
     good_contours = None
     for c in contours:
         if cv2.contourArea(c) < 300:
             continue
         rect = cv2.minAreaRect(c)
-        #box = cv2.cv.BoxPoints(rect)
-        box = cv2.boxPoints(rect)
+
+        box = None
+        if cv_version == "2":
+            box = cv2.cv.BoxPoints(rect)
+        elif cv_version == "3":
+            box = cv2.boxPoints(rect)
+
         cv2.drawContours(in_copy, [np.int0(box)], 0, (255, 0, 255), thickness=3)
 
         if good_contours is None:
