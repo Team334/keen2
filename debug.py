@@ -1,15 +1,13 @@
 import cv2
 import numpy as np
+import compat
 
 # returns writer for video
 def initOutputVideo(w, h, name='out_video.avi'):
     cv_version = cv2.__version__.split('.')[0]
-    print(cv_version)
-    fourcc = None
-    if cv_version == "2":
-        fourcc = cv2.cv.FOURCC('M', 'P', 'E', 'G')
-    elif cv_version == "3":
-        fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
+
+    fourcc = compat.fourcc()
+    
     writer = cv2.VideoWriter()
     print('open writer', writer.open(name, fourcc, 25, (w, h)))
     return writer

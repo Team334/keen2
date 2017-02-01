@@ -1,6 +1,6 @@
 import cv2, sys, time
 import numpy as np
-import debug
+import debug, compat
 
 from networktables import NetworkTables
 NetworkTables.initialize(server='10.3.34.22')
@@ -38,11 +38,7 @@ def process_frame(frame):
 
     in_copy = frame.copy()
 
-    contours = None
-    if cv_version == "2":
-        contours, h = cv2.findContours(thresh.copy(), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
-    elif cv_version == "3":
-        _, contours, h = cv2.findContours(thresh.copy(), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
+    contours = compat.findContours(thresh.copy(), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
 
     good_contours = None
     for c in contours:
@@ -50,11 +46,7 @@ def process_frame(frame):
             continue
         rect = cv2.minAreaRect(c)
 
-        box = None
-        if cv_version == "2":
-            box = cv2.cv.BoxPoints(rect)
-        elif cv_version == "3":
-            box = cv2.boxPoints(rect)
+        box = compat.boxPoints(rect)
 
         cv2.drawContours(in_copy, [np.int0(box)], 0, (255, 0, 255), thickness=3)
 
@@ -68,13 +60,13 @@ def process_frame(frame):
         cv2.drawContours(in_copy, [hull], 0, (0, 0, 255), thickness=3)
 
         M = cv2.moments(hull)
-        center_point = (int(M["m10"]/M["m00"]), int(M["m01"]/M["m00"]))
+        contour_center = (int(M["m10"]/M["m00"]), int(M["m01"]/M["m00"]))
 
-        x_offset = center_point[0] - (in_copy.shape[1]/2.0)
+#        x_offset = center_point[0] - (in_copy.shape[1]/2.0)
         min_x = hull[:,:,0].min()
         max_x = hull[:,:,0].max()
 
-        half_length_px = max_x - center_point[0]
+        half_length_px = max_x - contour_center[0]
 
         width_approx = hull[:,:,0].max() - hull[:,:,0].min()
         height_approx = hull[:,:,1].max() - hull[:,:,1].min()
@@ -82,9 +74,9 @@ def process_frame(frame):
         area = cv2.contourArea(hull, True)
 
         if width_approx > height_approx:
-            px_offset = center_point[0] + (half_length_px / (10.25/2)) * 8 - in_copy.shape[1]/2
+            px_offset = contour_center[0] + (half_length_px / (10.25/2)) * 8 - in_copy.shape[1]/2
         else:
-            px_offset = center_point[0] + (width_approx/2.0)*3.8 - in_copy.shape[1]/2
+            px_offset = contour_center[0] + (width_approx/2.0)*3.8 - in_copy.shape[1]/2
             area = height_approx * (width_approx*(10.25/2.0))
 
         mid_x = (hull[:,:,0].min() + hull[:,:,0].max())/2.0
