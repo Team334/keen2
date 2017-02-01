@@ -17,9 +17,9 @@ def boxPoints(rect):
     elif cv_version == "3":
         return cv2.boxPoints(rect)
 
-def fourcc():
+def fourcc(*args):
     cv_version =  cv2.__version__.split(".")[0]
     if cv_version == "2":
-        return cv2.cv.FOURCC('M', 'P', 'E', 'G')
+        return cv2.cv.FOURCC(*args)
     elif cv_version == "3":
-        return cv2.VideoWriter_fourcc('M','J','P','G')
+        return cv2.VideoWriter_fourcc(*args)

@@ -6,7 +6,7 @@ import compat
 def initOutputVideo(w, h, name='out_video.avi'):
     cv_version = cv2.__version__.split('.')[0]
 
-    fourcc = compat.fourcc()
+    fourcc = compat.fourcc('M', 'J', 'P', 'G')
     
     writer = cv2.VideoWriter()
     print('open writer', writer.open(name, fourcc, 25, (w, h)))
