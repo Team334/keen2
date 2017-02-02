@@ -26,7 +26,7 @@ times = np.zeros((30,))
 
 def process_frame(frame):
     # stores any values you want to print
-    dict = {}
+    textToDisplay = {}
 
     frame = cv2.medianBlur(frame,5) 
     blue, green, red = frame[:,:,0], frame[:,:,1], frame[:,:,2]
@@ -91,7 +91,7 @@ def process_frame(frame):
         skew = float(left_count - right_count) / total_count
         VISION_TABLE.putNumber('skew', skew)
         
-        dict.update({"Skew":skew, "Area":area, "Offset":px_offset})
+        textToDisplay.update({"Skew":skew, "Area":area, "Offset":px_offset})
 
         print("Skew: %.3f" % skew)
         cv2.circle(in_copy, (int(px_offset+in_copy.shape[1]/2), int(in_copy.shape[0]/2)), 7, (255,0,0), thickness=-1)
@@ -103,10 +103,10 @@ def process_frame(frame):
     times = np.roll(times, -1)
     times[-1] = time.time() - prev_time
     fps = (1 / np.mean(times))
-    dict["fps"] = fps
+    textToDisplay["fps"] = fps
 
     if mode == "DEBUG":
-        debug.putValuesOnImage(in_copy, dict)
+        debug.putValuesOnImage(in_copy, textToDisplay)
         debug.writeToVideo(in_copy, writer)
         debug.sendImage(VISION_TABLE, in_copy)
 
