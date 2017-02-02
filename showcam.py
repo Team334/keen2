@@ -23,8 +23,8 @@ times = np.zeros((30,))
 
 def process_frame(frame):
     # stores any values you want to print
-    dict = {}
-    
+    textToDisplay = {}
+
     in_copy = frame.copy()
     
     thresh = process.adaptiveGreenThreshold(in_copy)
@@ -43,7 +43,7 @@ def process_frame(frame):
         
         skew = process.getSkew(in_copy, hull)
         
-        dict.update({"Skew":skew, "Area":area, "Offset":px_offset})
+        textToDisplay.update({"Skew":skew, "Area":area, "Offset":px_offset})
 
         print("Skew: %.3f" % skew)
         print("putting offset,area: ", px_offset, area)
@@ -55,10 +55,10 @@ def process_frame(frame):
     times = np.roll(times, -1)
     times[-1] = time.time() - prev_time
     fps = (1 / np.mean(times))
-    dict["fps"] = fps
+    textToDisplay["fps"] = fps
 
     if mode == "DEBUG":
-        debug.putValuesOnImage(in_copy, dict)
+        debug.putValuesOnImage(in_copy, textToDisplay)
         debug.writeToVideo(in_copy, writer)
         debug.sendImage(VISION_TABLE, in_copy)
 
