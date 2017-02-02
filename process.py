@@ -20,7 +20,7 @@ def adaptiveGreenThreshold(image):
     img_combo = green - blue * blue_scale - red * red_scale # highlights how green something is
     img_combo[img_combo < 0] = 0 # turn negatives to 0 to avoid wrapping 
     img_combo = img_combo.astype(dtype=np.uint8)
-    _, thresh = cv2.threshold(img_combo,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    _, thresh = cv2.threshold(img_combo, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     return thresh
 
@@ -31,19 +31,17 @@ def adaptiveGreenThreshold(image):
 # 
 # returns filtered contours
 def filterContours(contours):
+    areaThreshold = 300
     good_contours = None
     for c in contours:
-        if cv2.contourArea(c) < 300:
+        if cv2.contourArea(c) < areaThreshold:
            continue
         rect = cv2.minAreaRect(c)
         box = compat.boxPoints(rect)
-        #box = cv2.cv.BoxPoints(rect)
-        #box = cv2.boxPoints(rect)
-        #cv2.drawContours(image, [np.int0(box)], 0, (255, 0, 255), thickness=3)
         if good_contours is None:
             good_contours = c
         else:
-            good_contours = np.concatenate((good_contours, c),axis=0)
+            good_contours = np.concatenate((good_contours, c), axis=0)
     
     return good_contours
 
