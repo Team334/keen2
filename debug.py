@@ -24,13 +24,13 @@ def writeToVideo(image, writer):
 #
 # Arguments:
 #   *image = image to put values on
-#   *dict = map of values you want to display
+#   *textToDisplay = map of values you want to display
 #
 # Returns image with values
-def putValuesOnImage(image, dict):
+def putValuesOnImage(image, textToDisplay):
     count = 0
-    for key in dict:
-        cv2.putText(image, "{} {:f}".format(key, dict[key]), (10, 40+30*count), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255))
+    for key in textToDisplay:
+        cv2.putText(image, "{} {:f}".format(key, textToDisplay[key]), (10, 40+30*count), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255))
         count += 1
     
     return image
