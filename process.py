@@ -56,16 +56,16 @@ def getOffsetAndArea(image, hull):
     M = cv2.moments(hull)
     contour_center = (int(M["m10"]/M["m00"]), int(M["m01"]/M["m00"]))
 
-    min_x = hull[:,:,0].min(); min_y = hull[:,:,1].min()
-    max_x = hull[:,:,0].max(); max_y = hull[:,:,1].max()
+    min_x = hull[:,:,0].min() 
+    max_x = hull[:,:,0].max()
     
     half_length_px = max_x - contour_center[0]
 
-    width_approx = max_x - min_y
-    height_approx = max_y - min_y
-
+    width_approx = hull[:,:,0].max() - hull[:,:,0].min() 
+    height_approx = hull[:,:,1].max() - hull[:,:,1].min()
+   
     px_offset, area = None, None
-    isCutOff = width_approx > height_approx
+    isCutOff = width_approx < height_approx
     if not isCutOff:
         px_offset = contour_center[0] + (half_length_px / (10.25/2)) * 8 - image.shape[1]/2
         area = cv2.contourArea(hull, True)
@@ -93,3 +93,19 @@ def getSkew(image, hull):
     skew = float(left_count - right_count) / total_count
 
     return skew
+
+# Find angle from center to pixel
+# OFFSET / total_width = ? / FOV
+#
+# Arguments:
+#   *image = image containing pixel
+#   *pixel = point on image
+#
+# returns angle in degrees
+def getAngleToPixel(image, pixel):
+    img_width = image.shape[1]
+    cam_FOV = 47 # aspect ratio = 4:3, diagonal = 57 degrees
+    offset = int(pixel[1] - image.shape[1]/2)
+
+    return (img_width / cam_FOV) * offset
+

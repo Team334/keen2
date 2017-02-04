@@ -26,9 +26,7 @@ def process_frame(frame):
     textToDisplay = {}
 
     in_copy = frame.copy()
-    
     thresh = process.adaptiveGreenThreshold(in_copy)
-    
     contours = compat.findContours(thresh.copy(), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
     
     good_contours = process.filterContours(contours)
