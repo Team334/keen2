@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import compat
+import time
 
 # Finds green targets in axm image
 # Green channel - Blue channel - Red channel (Team 900 formula)
@@ -14,15 +15,17 @@ import compat
 #
 # returns thresholded image
 def adaptiveGreenThreshold(image):
-    image = cv2.medianBlur(image,5) 
+    #image = cv2.medianBlur(image,5) 
     blue, green, red = image[:,:,0], image[:,:,1], image[:,:,2]
     blue_scale, red_scale = .9, .9
     img_combo = green - blue * blue_scale - red * red_scale # highlights how green something is
     img_combo[img_combo < 0] = 0 # turn negatives to 0 to avoid wrapping 
     img_combo = img_combo.astype(dtype=np.uint8)
     _, thresh = cv2.threshold(img_combo, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    eroded = cv2.erode(thresh, (3,3), iterations=2)
+    dilated = cv2.dilate(eroded, (3, 3), iterations=2)
 
-    return thresh
+    return dilated
 
 # Finds target possibilities
 #
@@ -102,10 +105,9 @@ def getSkew(image, hull):
 #   *pixel = point on image
 #
 # returns angle in degrees
-def getAngleToPixel(image, pixel):
+def getHorizontalAngleToPixel(image, x_offset):
     img_width = image.shape[1]
     cam_FOV = 47 # aspect ratio = 4:3, diagonal = 57 degrees
-    offset = int(pixel[1] - image.shape[1]/2)
 
-    return (img_width / cam_FOV) * offset
+    return (x_offset / img_width) * cam_FOV
 

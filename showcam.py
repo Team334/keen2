@@ -30,31 +30,36 @@ def process_frame(frame):
     contours = compat.findContours(thresh.copy(), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
     
     good_contours = process.filterContours(contours)
-    cv2.drawContours(in_copy, [good_contours], 0, (255, 0, 255), thickness=3)
+    #cv2.drawContours(in_copy, [good_contours], 0, (255, 0, 255), thickness=3)
     
     if good_contours is not None:
         hull = cv2.convexHull(good_contours)
         cv2.drawContours(in_copy, [hull], 0, (0, 0, 255), thickness=3)
 
         px_offset, area = process.getOffsetAndArea(in_copy, hull)
-        cv2.circle(in_copy, (int(px_offset+in_copy.shape[1]/2), int(in_copy.shape[0]/2)), 7, (255,0,0), thickness=-1)
-        
+        #cv2.circle(in_copy, (int(px_offset+in_copy.shape[1]/2), int(in_copy.shape[0]/2)), 7, (255,0,0), thickness=-1)
+        #cv2.circle(in_copy, (int(in_copy.shape[1]/2), int(in_copy.shape[0]/2)), 7, (0,255,0), thickness=-1)      
         skew = process.getSkew(in_copy, hull)
         
-        textToDisplay.update({"Skew":skew, "Area":area, "Offset":px_offset})
+        angle = process.getHorizontalAngleToPixel(in_copy, px_offset)
+
+        textToDisplay.update({"Skew":skew, "Area":area, "Offset":px_offset, "Angle":angle})
 
         print("Skew: %.3f" % skew)
+        print("Angle: ", angle)
         print("putting offset,area: ", px_offset, area)
         VISION_TABLE.putNumber('x_offset', px_offset)
         VISION_TABLE.putNumber('area', area)
         VISION_TABLE.putNumber('skew', skew)
+        VISION_TABLE.putNumber("angle", angle)
 
     global times
     times = np.roll(times, -1)
     times[-1] = time.time() - prev_time
     fps = (1 / np.mean(times))
     textToDisplay["fps"] = fps
-
+    print("FPS = ", fps)
+    
     if mode == "DEBUG":
         debug.putValuesOnImage(in_copy, textToDisplay)
         debug.writeToVideo(in_copy, writer)
@@ -65,12 +70,13 @@ def process_frame(frame):
 while True:
     ret, frame = cap.read()
     if frame is None:
-        print("NO FRAME")
+        print("No frame")
 
     output = process_frame(frame)
 
-    cv2.imshow('processed', output)
     prev_time = time.time()
+
+    #cv2.imshow('processed', output)
     if cv2.waitKey(10)&0xFF==ord('q'):
         break
 
