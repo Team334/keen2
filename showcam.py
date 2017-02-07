@@ -1,6 +1,13 @@
-import cv2, sys, time
+import cv2
+import sys
+import time
+
 import numpy as np
-import debug, compat, process
+
+import debug
+import compat
+import process
+from vision_utils.fps import FPSCounter
 
 from networktables import NetworkTables
 NetworkTables.initialize(server='10.3.34.22')
@@ -17,9 +24,7 @@ writer = None
 if mode == "DEBUG":
     writer = debug.initOutputVideo(w=640, h=480)
     #writer = debug.initOutputVideo(w=1280, h=720)
-
-prev_time = time.time()
-times = np.zeros((30,))
+fps = FPSCounter()
 
 def process_frame(frame):
     # stores any values you want to print
@@ -53,12 +58,9 @@ def process_frame(frame):
         VISION_TABLE.putNumber('skew', skew)
         VISION_TABLE.putNumber("angle", angle)
 
-    global times
-    times = np.roll(times, -1)
-    times[-1] = time.time() - prev_time
-    fps = (1 / np.mean(times))
-    textToDisplay["fps"] = fps
-    print("FPS = ", fps)
+    fps.got_frame()
+    textToDisplay["fps"] = fps.fps()
+    print("FPS = ", fps.fps())
     
     if mode == "DEBUG":
         debug.putValuesOnImage(in_copy, textToDisplay)
@@ -74,9 +76,8 @@ while True:
 
     output = process_frame(frame)
 
-    prev_time = time.time()
-
     #cv2.imshow('processed', output)
+    
     if cv2.waitKey(10)&0xFF==ord('q'):
         break
 
