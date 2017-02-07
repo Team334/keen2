@@ -72,11 +72,12 @@ def process_frame(frame):
 while True:
     ret, frame = cap.read()
     if frame is None:
-        print("NO FRAME")
+        print("No frame")
 
     output = process_frame(frame)
 
-    cv2.imshow('processed', output)
+    #cv2.imshow('processed', output)
+    
     if cv2.waitKey(10)&0xFF==ord('q'):
         break
 
