@@ -1,0 +1,7 @@
+*.pyc
+
+out_video.avi
+
+__pycache__
+
+.DS_STORE
