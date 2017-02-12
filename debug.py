@@ -27,10 +27,10 @@ def writeToVideo(image, writer):
 #   *textToDisplay = map of values you want to display
 #
 # Returns image with values
-def putValuesOnImage(image, textToDisplay):
+def putValuesOnImage(image, data):
     count = 0
-    for key in textToDisplay:
-        cv2.putText(image, "{} {:f}".format(key, textToDisplay[key]), (10, 40+30*count), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255))
+    for key, value in data.items():
+        cv2.putText(image, "{} {:f}".format(key, value), (10, 40+30*count), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255))
         count += 1
     
     return image
