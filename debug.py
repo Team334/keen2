@@ -30,7 +30,7 @@ def writeToVideo(image, writer):
 def putValuesOnImage(image, data):
     count = 0
     for key, value in data.items():
-        cv2.putText(image, "{} {:f}".format(key, value), (10, 40+30*count), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255))
+        cv2.putText(image, "{} {}".format(key, value), (10, 40+30*count), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255))
         count += 1
     
     return image

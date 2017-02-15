@@ -19,7 +19,7 @@ VISION_TABLE = nt.initTable()
 
 CAMERA_KEY = "camera"
 GEAR_VALUE = "gear"
-BOILER_VALUE = "value"
+BOILER_VALUE = "boiler"
 
 # automatically updates when value is changed
 cam = VISION_TABLE.getAutoUpdateValue(CAMERA_KEY, GEAR_VALUE)
@@ -59,12 +59,14 @@ def process_frame(frame):
         print("angle: ", angle)
         print("putting offset,area: ", px_offset, area)
         
-        nt.sendData(data)
+        nt.sendData(VISION_TABLE, data)
 
     fps.got_frame()
     data["fps"] = fps.fps()
     print("FPS = ", fps.fps())
-    
+   
+    data["camera"] = cam.value
+
     if mode == "DEBUG":
         # draw
         cv2.drawContours(in_copy, [good_contours], 0, (255, 0, 255), thickness=3)
@@ -80,8 +82,10 @@ def process_frame(frame):
 while True:
     # choose camera
     if cam.value == GEAR_VALUE:
+        print ("Back to Gear")
         cap = gearCap
     elif cam.value == BOILER_VALUE:
+        print ("Switching to Boiler")
         cap = boilerCap
 
     ret, frame = cap.read()
@@ -90,10 +94,11 @@ while True:
 
     output = process_frame(frame)
 
-    cv2.imshow('processed', output)
+    #cv2.imshow('processed', output)
     
     if cv2.waitKey(10)&0xFF==ord('q'):
         break
 
-cap.release()
+gearCap.release()
+boilerCap.release()
 cv2.destroyAllWindows()
