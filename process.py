@@ -70,6 +70,7 @@ def getOffsetAndArea(image, hull):
     px_offset, area = None, None
     isCutOff = width_approx < height_approx
     if not isCutOff:
+         # contour_center + ((pixels per inches) * inches from cam to gear) - center of image
         px_offset = contour_center[0] + (half_length_px / (10.25/2)) * 8 - image.shape[1]/2
         area = cv2.contourArea(hull, True)
     # IMAGE IS CUT OFF
@@ -110,4 +111,3 @@ def getHorizontalAngleToPixel(image, x_offset):
     cam_FOV = 47 # aspect ratio = 4:3, diagonal = 57 degrees
 
     return (x_offset / img_width) * cam_FOV
-

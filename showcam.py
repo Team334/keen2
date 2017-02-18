@@ -26,7 +26,7 @@ cam = VISION_TABLE.getAutoUpdateValue(CAMERA_KEY, GEAR_VALUE)
 
 gearCap = cv2.VideoCapture(0)
 boilerCap = cv2.VideoCapture(1)
-cap = gearCap # default
+cap = gearCap # default camera
 
 writer = None
 if mode == "DEBUG":
@@ -43,14 +43,16 @@ def process_frame(frame):
     thresh = process.adaptiveGreenThreshold(in_copy)
     contours = compat.findContours(thresh.copy(), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
     good_contours = process.filterContours(contours)
-    
+
+    # found a target
     if good_contours is not None:
+        data["found"] = True
+
         hull = cv2.convexHull(good_contours)
         #cv2.drawContours(in_copy, [hull], 0, (0, 0, 255), thickness=3)
 
         px_offset, area = process.getOffsetAndArea(in_copy, hull)
-        cv2.circle(in_copy, (int(px_offset+in_copy.shape[1]/2), int(in_copy.shape[0]/2)),
-                   7, (255,0,0), thickness=-1)
+        cv2.circle(in_copy, (int(px_offset+in_copy.shape[1]/2), int(in_copy.shape[0]/2)), 7, (255,0,0), thickness=-1)
         angle = process.getHorizontalAngleToPixel(in_copy, px_offset)
         #skew = process.getSkew(in_copy, hull)
 
@@ -58,8 +60,10 @@ def process_frame(frame):
 
         print("angle: ", angle)
         print("putting offset,area: ", px_offset, area)
-        
-        nt.sendData(VISION_TABLE, data)
+    else:
+        data["found"] = False
+
+    nt.sendData(VISION_TABLE, data)
 
     fps.got_frame()
     data["fps"] = fps.fps()
@@ -70,22 +74,21 @@ def process_frame(frame):
     if mode == "DEBUG":
         # draw
         cv2.drawContours(in_copy, [good_contours], 0, (255, 0, 255), thickness=3)
-        cv2.circle(in_copy, (int(in_copy.shape[1]/2), int(in_copy.shape[0]/2)),
-                   7, (0,255,0), thickness=-1)
+        cv2.circle(in_copy, (int(in_copy.shape[1]/2), int(in_copy.shape[0]/2)), 7, (0,255,0), thickness=-1)
         
         debug.putValuesOnImage(in_copy, data)
         debug.writeToVideo(in_copy, writer)
-        debug.sendImage(VISION_TABLE, in_copy)
+        #debug.sendImage(VISION_TABLE, in_copy)
 
     return in_copy
 
 while True:
+    nt.sendData(VISION_TABLE, {"running":True})
+
     # choose camera
     if cam.value == GEAR_VALUE:
-        print ("Back to Gear")
         cap = gearCap
     elif cam.value == BOILER_VALUE:
-        print ("Switching to Boiler")
         cap = boilerCap
 
     ret, frame = cap.read()
@@ -95,10 +98,11 @@ while True:
     output = process_frame(frame)
 
     #cv2.imshow('processed', output)
-    
+
     if cv2.waitKey(10)&0xFF==ord('q'):
         break
 
+# clean everything up
 gearCap.release()
 boilerCap.release()
 cv2.destroyAllWindows()
