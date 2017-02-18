@@ -57,7 +57,6 @@ def process_frame(frame):
         #skew = process.getSkew(in_copy, hull)
 
         data.update({"area":area, "x_offset":px_offset, "angle":angle})
-
         print("angle: ", angle)
         print("putting offset,area: ", px_offset, area)
     else:
@@ -68,20 +67,21 @@ def process_frame(frame):
     fps.got_frame()
     data["fps"] = fps.fps()
     print("FPS = ", fps.fps())
-   
+
     data["camera"] = cam.value
 
     if mode == "DEBUG":
         # draw
         cv2.drawContours(in_copy, [good_contours], 0, (255, 0, 255), thickness=3)
         cv2.circle(in_copy, (int(in_copy.shape[1]/2), int(in_copy.shape[0]/2)), 7, (0,255,0), thickness=-1)
-        
+
         debug.putValuesOnImage(in_copy, data)
         debug.writeToVideo(in_copy, writer)
         #debug.sendImage(VISION_TABLE, in_copy)
 
     return in_copy
 
+# CONTROL C to stop
 while True:
     nt.sendData(VISION_TABLE, {"running":True})
 
@@ -94,13 +94,12 @@ while True:
     ret, frame = cap.read()
     if frame is None:
         print("NO FRAME")
+        nt.sendData(VISION_TABLE, {"found":False})
+        continue
 
     output = process_frame(frame)
 
     #cv2.imshow('processed', output)
-
-    if cv2.waitKey(10)&0xFF==ord('q'):
-        break
 
 # clean everything up
 gearCap.release()
