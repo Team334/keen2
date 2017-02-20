@@ -1,4 +1,7 @@
 import cv2
+import numpy as np
+import numbers
+import decimal
 import logging
 
 from networktables import NetworkTables
@@ -25,10 +28,11 @@ def initTable(server="10.3.34.22"):
 #   *data = map of values to send
 def sendData(NETWORK_TABLE, data):
     for key, value in data.iteritems():
-        if type(value) is int or type(value) is float:
-            NETWORK_TABLE.putNumber(key, value)
-        elif type(value) is str:
-            NETWORK_TABLE.putString(key, value)
-        elif type(value) is bool:
+        print ("key", key, "value", value)
+        if isinstance(value, bool):
             NETWORK_TABLE.putBoolean(key, value)
+        elif isinstance(value, numbers.Number):
+            NETWORK_TABLE.putNumber(key, value)
+        elif isinstance(value, str):
+            NETWORK_TABLE.putString(key, value)
 
