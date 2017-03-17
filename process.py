@@ -68,10 +68,11 @@ def getOffsetAndArea(image, hull):
     height_approx = hull[:,:,1].max() - hull[:,:,1].min()
    
     px_offset, area = None, None
-    isCutOff = width_approx < height_approx
+    isCutOff = width_approx < height_approx # maybe check if height proportional to width
     if not isCutOff:
          # contour_center + ((pixels per inches) * inches from cam to gear) - center of image
-        px_offset = contour_center[0] + (half_length_px / (10.25/2)) * 8 - image.shape[1]/2
+        #px_offset = contour_center[0] + (half_length_px / (10.25/2)) * 8 - image.shape[1]/2
+        px_offset = contour_center[0] - image.shape[1]/2
         area = cv2.contourArea(hull, True)
     # IMAGE IS CUT OFF
     # APPROXIMATIONS ARE MADE
